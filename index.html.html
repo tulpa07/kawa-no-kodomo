@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>川和県児童収蔵記録</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --bg: #020202;
+      --panel: #090909;
+      --panel2: #111;
+      --line: #2a2a2a;
+      --line2: #3b3b3b;
+      --text: #d7d7d7;
+      --muted: #7d7d7d;
+      --accent: #9e1f1f;
+      --accent2: #d1d1d1;
+      --link: #9eb8ff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 50% -10%, rgba(110,110,110,.12), transparent 28%),
+        radial-gradient(circle at 15% 30%, rgba(120,0,0,.08), transparent 25%),
+        repeating-linear-gradient(
+          0deg,
+          #020202 0px,
+          #020202 2px,
+          #050505 3px,
+          #050505 4px
+        );
+      font-family: "MS PGothic", "Yu Gothic", sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255,255,255,.02) 50%, rgba(0,0,0,.03) 50%),
+        linear-gradient(90deg, rgba(255,0,0,.012), rgba(0,255,255,.008), rgba(0,0,255,.012));
+      background-size: 100% 4px, 3px 100%;
+      mix-blend-mode: screen;
+      opacity: .55;
+      z-index: 9998;
+    }
+
+    body.modal-open { overflow: hidden; }
+
+    a {
+      color: var(--link);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    a:visited { color: #b49de0; }
+
+    .site-wrap {
+      width: 980px;
+      max-width: calc(100% - 20px);
+      margin: 14px auto 50px;
+      background: rgba(5,5,5,.97);
+      border: 1px solid #222;
+      box-shadow:
+        0 0 0 1px #000,
+        0 0 45px rgba(0,0,0,.85),
+        0 0 90px rgba(80,0,0,.10);
+    }
+
+    .top-strip {
+      padding: 6px 9px;
+      background: #000;
+      border-bottom: 1px solid #262626;
+      color: #9b9b9b;
+      font-size: 11px;
+      letter-spacing: .7px;
+    }
+
+    header {
+      position: relative;
+      overflow: hidden;
+      padding: 24px 24px 20px;
+      border-bottom: 1px solid #2b2b2b;
+      background:
+        radial-gradient(circle at 78% 50%, rgba(255,255,255,.04), transparent 20%),
+        linear-gradient(180deg, #0b0b0b, #020202);
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0 48%, rgba(255,255,255,.015) 49%, transparent 50%);
+      opacity: .5;
+      pointer-events: none;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 24px;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 0;
+      color: #f0f0f0;
+      font-family: "Yu Mincho", "MS Mincho", serif;
+      font-size: 42px;
+      font-weight: normal;
+      letter-spacing: 12px;
+      text-shadow:
+        2px 0 0 rgba(140,0,0,.20),
+        -2px 0 0 rgba(0,70,100,.16),
+        0 0 14px rgba(255,255,255,.06);
+    }
+
+    .kana {
+      margin-top: 7px;
+      color: #6e6e6e;
+      font-family: "MS Mincho", serif;
+      font-size: 11px;
+      letter-spacing: 6px;
+    }
+
+    .tagline {
+      margin-top: 16px;
+      color: #9a9a9a;
+      line-height: 1.9;
+      font-size: 13px;
+    }
+
+    .blink {
+      display: inline-block;
+      margin-top: 14px;
+      color: #8f2d2d;
+      font-size: 12px;
+      animation: flicker 2.7s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 17%, 19%, 21%, 65%, 100% { opacity: 1; }
+      18%, 20%, 66% { opacity: .2; }
+    }
+
+    .hero-image {
+      position: relative;
+      height: 240px;
+      border: 1px solid #252525;
+      background: #000;
+      overflow: hidden;
+      box-shadow: inset 0 0 70px rgba(0,0,0,.95);
+      cursor: pointer;
+    }
+
+    .hero-image::before {
+      content: "画像 04";
+      position: absolute;
+      left: 8px;
+      top: 6px;
+      z-index: 2;
+      color: #5d5d5d;
+      font-size: 10px;
+      font-family: monospace;
+    }
+
+    .hero-image .hint {
+      position: absolute;
+      right: 7px;
+      bottom: 5px;
+      z-index: 3;
+      color: #474747;
+      font-size: 9px;
+    }
+
+    nav {
+      padding: 8px 8px;
+      border-bottom: 1px solid #252525;
+      background: #070707;
+      text-align: center;
+      font-size: 12px;
+    }
+    nav a { margin: 0 12px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 15px;
+      padding: 15px;
+    }
+
+    aside { font-size: 12px; }
+
+    .side-box {
+      margin-bottom: 13px;
+      border: 1px solid #252525;
+      background: #090909;
+    }
+
+    .side-title {
+      padding: 6px 8px;
+      color: #cfcfcf;
+      background: #111;
+      border-bottom: 1px solid #292929;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .side-box ul {
+      margin: 0;
+      padding: 8px 8px 8px 24px;
+      line-height: 1.9;
+      color: #999;
+    }
+
+    .side-box p {
+      margin: 0;
+      padding: 8px;
+      line-height: 1.8;
+      color: #8f8f8f;
+    }
+
+    .section, .notice-box {
+      margin-bottom: 17px;
+      border: 1px solid #262626;
+      background: #080808;
+      padding: 12px 14px;
+      box-shadow: inset 0 0 26px rgba(255,255,255,.01);
+    }
+
+    .notice-box {
+      border-color: #492020;
+      background: linear-gradient(180deg, #100707, #080808);
+    }
+
+    .section h2, .notice-box h2 {
+      margin: 0 0 9px;
+      padding: 4px 8px;
+      border-left: 7px solid #3e3e3e;
+      border-bottom: 1px solid #252525;
+      color: #d5d5d5;
+      font-family: "MS Mincho", serif;
+      font-size: 17px;
+      font-weight: normal;
+    }
+
+    .notice-box h2 {
+      border-left-color: #7f2020;
+      color: #d59c9c;
+    }
+
+    .section p,
+    .section li,
+    .section td,
+    .section th,
+    .notice-box p {
+      color: #bdbdbd;
+      line-height: 1.85;
+    }
+
+    .section ol, .section ul { padding-left: 25px; }
+
+    .warning-list {
+      background: #030303;
+      border: 1px dashed #343434;
+      padding: 12px 18px 12px 38px;
+    }
+
+    .warning-list li:nth-child(4),
+    .warning-list li:nth-child(8),
+    .warning-list li:nth-child(11) {
+      color: #a87575;
+    }
+
+    .muted { color: #6f6f6f !important; font-size: 12px; }
+    .red { color: #b85f5f !important; font-weight: bold; }
+
+    .old-log, .faq-box, .bbs-box, .case-box, .locked-box {
+      background: #030303;
+      border: 1px solid #282828;
+      padding: 10px;
+      line-height: 1.8;
+      font-family: "MS Gothic", monospace;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .record-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+
+    .record-table th,
+    .record-table td {
+      border: 1px solid #282828;
+      padding: 7px 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .record-table th {
+      width: 185px;
+      background: #111;
+      color: #cfcfcf;
+      font-weight: normal;
+      font-family: "MS Mincho", serif;
+    }
+
+    .search-box, .tool-box {
+      margin-top: 10px;
+      padding: 10px;
+      background: #030303;
+      border: 1px solid #282828;
+    }
+
+    .search-box input,
+    .tool-box input {
+      width: 72%;
+      padding: 6px 7px;
+      border: 1px inset #494949;
+      background: #000;
+      color: #d0d0d0;
+      font-family: "MS Gothic", monospace;
+    }
+
+    button {
+      padding: 6px 10px;
+      border: 2px outset #444;
+      background: #151515;
+      color: #d7d7d7;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    button:active { border-style: inset; }
+
+    .search-result, .tool-result {
+      margin-top: 10px;
+      color: #bdbdbd;
+      font-size: 12px;
+      min-height: 20px;
+    }
+
+    .tiny { font-size: 11px; color: #676767; }
+
+    .hidden-text {
+      color: #080808;
+      background: #080808;
+      user-select: text;
+    }
+
+    .case-entry {
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px dotted #2f2f2f;
+    }
+    .case-entry:last-child {
+      border-bottom: 0;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .case-id {
+      color: #777;
+      font-size: 11px;
+    }
+
+    .locked-link {
+      color: #8f8f8f;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    footer {
+      padding: 18px 12px 24px;
+      border-top: 1px solid #252525;
+      text-align: center;
+      font-size: 11px;
+      color: #666;
+      background: #020202;
+    }
+
+    .counter {
+      display: inline-block;
+      margin-top: 7px;
+      padding: 3px 7px;
+      border: 2px inset #353535;
+      background: #000;
+      color: #8fa77d;
+      font-family: monospace;
+      letter-spacing: 3px;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(0,0,0,.96);
+    }
+    .modal-overlay.hidden { display: none; }
+
+    .modal-window {
+      width: 430px;
+      max-width: 100%;
+      border: 2px outset #c8c8c8;
+      background: #d4d0c8;
+      box-shadow: 8px 8px 0 rgba(0,0,0,.7);
+      font-family: "MS PGothic", sans-serif;
+      color: #111;
+    }
+
+    .modal-titlebar {
+      padding: 4px 7px;
+      color: white;
+      background: linear-gradient(90deg, #000050, #062f6e);
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .modal-body {
+      padding: 22px 24px 18px;
+      text-align: center;
+    }
+
+    .modal-icon {
+      font-size: 38px;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .modal-body h2 {
+      margin: 8px 0 10px;
+      font-size: 21px;
+    }
+
+    .modal-body p {
+      line-height: 1.7;
+      margin: 8px 0;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .modal-buttons button {
+      min-width: 105px;
+      background: #d4d0c8;
+      color: #111;
+      border-color: #eee;
+    }
+
+    .minor-warning { color: #8a1111; font-weight: bold; }
+
+    .glitch {
+      animation: glitch .10s steps(2, end) 6;
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0); filter: none; }
+      25% { transform: translate(7px,-4px) rotate(.25deg); filter: contrast(1.45); }
+      50% { transform: translate(-8px,3px) rotate(-.2deg); filter: invert(.10); }
+      75% { transform: translate(5px,4px) rotate(.15deg); }
+      100% { transform: translate(0); }
+    }
+
+    @media (max-width: 780px) {
+      .hero { grid-template-columns: 1fr; }
+      .layout { grid-template-columns: 1fr; }
+      aside { order: 2; }
+      h1 { font-size: 28px; letter-spacing: 6px; }
+      nav a { display: inline-block; margin: 4px 8px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="human-modal" class="modal-overlay">
+    <div class="modal-window" role="dialog" aria-modal="true">
+      <div class="modal-titlebar">本人確認</div>
+      <div class="modal-body">
+        <div class="modal-icon">?</div>
+        <h2 id="human-question">あなたは人間ですか？</h2>
+        <p id="human-question-ko">당신은 사람입니까?</p>
+        <div class="modal-buttons">
+          <button onclick="confirmHuman()">はい</button>
+          <button onclick="rejectHuman()">いいえ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="age-modal" class="modal-overlay hidden">
+    <div class="modal-window" role="dialog" aria-modal="true">
+      <div class="modal-titlebar">警告</div>
+      <div class="modal-body">
+        <div class="modal-icon">!</div>
+        <h2>18歳未満の方へ</h2>
+        <p>이 페이지에는 실종·사망·정신적 이상에 관한 기록이 포함되어 있습니다.</p>
+        <p class="minor-warning">18세 미만은 열람하지 마십시오.</p>
+        <div class="modal-buttons">
+          <button onclick="enterSite()">理解しました</button>
+          <button onclick="leaveSite()">戻る</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="site" class="site-wrap">
+    <div class="top-strip">
+      推奨環境：Internet Explorer 6.0 / 800×600 / JavaScript ON
+      ／ 本日の閲覧者：<span id="todayCount">1</span>名
+    </div>
+
+    <header>
+      <div class="hero">
+        <div>
+          <h1>川和県児童収蔵記録</h1>
+          <div class="kana">かわわけん じどう しゅうぞう きろく</div>
+          <div class="tagline">
+            郷土資料保存会が管理する人形・口承・訪問記録の閲覧頁。<br>
+            記録の一部は、事故防止のため意図的に欠落しています。
+          </div>
+          <div class="blink">※ 閲覧中に音声が再生された場合、画面を閉じないでください ※</div>
+        </div>
+
+        <div id="dollImage" class="hero-image" onclick="inspectDoll()" aria-label="黒い画像枠">
+          <div class="hint">画像をクリック</div>
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <a href="#notice">告知</a>
+      <a href="#rules">訪問規則</a>
+      <a href="#cases">事例</a>
+      <a href="#archive">記録庫</a>
+      <a href="#tools">照会</a>
+    </nav>
+
+    <div class="layout">
+      <aside>
+        <div class="side-box">
+          <div class="side-title">閲覧案内</div>
+          <ul>
+            <li><a href="#notice">最新告知</a></li>
+            <li><a href="#rules">訪問規則</a></li>
+            <li><a href="#cases">類似事例</a></li>
+            <li><a href="#archive">記録庫</a></li>
+            <li><a href="#tools">簡易照会</a></li>
+          </ul>
+        </div>
+
+        <div class="side-box">
+          <div class="side-title">更新履歴</div>
+          <ul>
+            <li>2026.06.18</li>
+            <li>2026.04.27</li>
+            <li>2026.03.02</li>
+            <li>2025.11.06</li>
+            <li>2025.09.14</li>
+          </ul>
+        </div>
+
+        <div class="side-box">
+          <div class="side-title">収蔵状態</div>
+          <p>
+            KAWA-04<br>
+            名称：未登録<br>
+            状態：閲覧制限<br>
+            音声：確認済<br>
+            数量：変動なし
+          </p>
+        </div>
+
+        <div class="side-box">
+          <div class="side-title">現在の表示</div>
+          <p id="statusText">
+            接続：正常<br>
+            音声：停止<br>
+            閲覧者：1名
+          </p>
+        </div>
+      </aside>
+
+      <main>
+        <section id="notice" class="notice-box">
+          <h2>重要告知</h2>
+          <p>
+            最近、規定外の言語・順序・人数による訪問が増えています。
+            「以前は問題なかった」という報告は、現在の安全を保証するものではありません。
+          </p>
+          <p class="red">
+            同行者の説明のみを信用せず、各自で規則を確認してください。
+          </p>
+        </section>
+
+        <section class="section">
+          <h2>この頁について</h2>
+          <p>
+            本頁は、川和県内で保管されてきた人形と、それに付随する口承・見学記録を整理するためのものです。
+            事故記録は個人情報保護のため加工されており、人数・発言・時刻が一致しない場合があります。
+          </p>
+          <p class="muted">
+            ※ 一致しない記録が複数存在する場合、最も人数の少ない記録を正しいものとして扱ってください。
+          </p>
+        </section>
+
+        <section id="rules" class="section">
+          <h2>訪問規則（抜粋）</h2>
+          <ol class="warning-list">
+            <li>訪問者一名につき、怪談を一話用意してください。</li>
+            <li>怪談は訪問者本人が、日本語で直接話してください。</li>
+            <li>代表者による代読、通訳、要約は認められません。</li>
+            <li>案内人が人数を数え直した場合、最初の人数を忘れてください。</li>
+            <li>顔を伏せ、両手を背中側に置いてください。</li>
+            <li>少女の声が聞こえても返事をしないでください。</li>
+            <li>「次」と言われるまで、その場を離れないでください。</li>
+            <li>同じ言葉を三度以上繰り返す者がいても、止めないでください。</li>
+            <li>録音機器の持ち込み自体は禁止していません。</li>
+            <li>記録された怪談を第三者に再生しないでください。</li>
+            <li>「一人前」という言葉を評価として受け取らないでください。</li>
+            <li>帰宅後、衣服が清潔であった場合は洗濯しないでください。</li>
+          </ol>
+          <p class="red">
+            規則を守ったにもかかわらず人数が減った場合、見学は正常に終了しています。
+          </p>
+        </section>
+
+        <section id="cases" class="section">
+          <h2>類似事例</h2>
+          <div class="case-box">
+            <div class="case-entry">
+              <div class="case-id">事例 04-17／2018年</div>
+              3名で訪問。2名が怪談を持参。退館時、案内人は「全員分受領」と記録。
+              翌日、予約者は「最初から2名だった」と証言。
+            </div>
+
+            <div class="case-entry">
+              <div class="case-id">事例 11-02／2021年</div>
+              通訳者1名を含む4名で訪問。通訳者のみ帰宅後も日本語を話し続けた。
+              本人は日本語を学習した経験がなかった。
+            </div>
+
+            <div class="case-entry">
+              <div class="case-id">事例 08-29／2023年</div>
+              録音媒体を川へ投棄。三日後、同じ音声が別の機器から再生された。
+              再生者は内容を「子守歌」と説明。
+            </div>
+
+            <div class="case-entry">
+              <div class="case-id">事例 09-10／2025年</div>
+              <span class="hidden-text">訪問者5名。帰還確認2名。</span>
+              記録の一部は現在も照合中です。
+            </div>
+          </div>
+        </section>
+
+        <section id="archive" class="section">
+          <h2>記録庫</h2>
+          <table class="record-table">
+            <tr><th>記録番号</th><td>KAWA-04-A</td></tr>
+            <tr><th>分類</th><td>人形／音声／口承</td></tr>
+            <tr><th>確認言語</th><td>日本語</td></tr>
+            <tr><th>応答形式</th><td>数量報告</td></tr>
+            <tr><th>注意</th><td>応答を賞賛・許可・合格の意味で解釈しないこと。</td></tr>
+            <tr><th>備考</th><td>一部記録に「二人前」の記載あり。音源未確認。</td></tr>
+          </table>
+
+          <div class="locked-box" style="margin-top:10px;">
+            <div class="locked-link" onclick="openLocked()">[施錠] 2025年9月・訪問記録</div>
+            <div id="lockedResult" class="tool-result"></div>
+          </div>
+        </section>
+
+        <section id="tools" class="section">
+          <h2>簡易照会</h2>
+
+          <div class="search-box">
+            <div class="tiny">記録検索</div>
+            <input id="searchInput" type="text" placeholder="一人前 / 二人前 / 録音 / 2025">
+            <button onclick="searchFake()">検索</button>
+            <div id="searchResult" class="search-result">検索語を入力してください。</div>
+          </div>
+
+          <div class="tool-box">
+            <div class="tiny">訪問人数照合</div>
+            <input id="countInput" type="number" min="1" max="9" placeholder="人数">
+            <button onclick="checkCount()">照合</button>
+            <div id="countResult" class="tool-result"></div>
+          </div>
+
+          <div class="tool-box">
+            <div class="tiny">音声確認</div>
+            <button onclick="playFakeAudio()">再生</button>
+            <button onclick="stopFakeAudio()">停止</button>
+            <div id="audioResult" class="tool-result">音声は停止しています。</div>
+          </div>
+
+          <div class="tool-box">
+            <div class="tiny">頁の再確認</div>
+            <button onclick="recountPage()">人数を再計算</button>
+            <div id="recountResult" class="tool-result"></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>掲示板記録</h2>
+          <div class="bbs-box">
+            <p>[公告] 海外からの予約停止について</p>
+            <p>[削除済] 案内人の説明がサイトと違いました</p>
+            <p>[施錠] 「一人前」の意味について</p>
+            <p>[削除済] 録音機器を川へ捨てた方へ</p>
+            <p>[公告] 本掲示板への新規投稿を停止します</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer>
+      川和県郷土資料保存会<br>
+      最終更新：2026年6月18日<br>
+      <span id="counter" class="counter">0001842</span><br><br>
+      ※ 本頁は創作作品の一部として制作された架空のウェブサイトです。
+    </footer>
+  </div>
+
+  <script>
+    document.body.classList.add("modal-open");
+
+    const visitKey = "kawawa_visit_count";
+    let visitCount = Number(localStorage.getItem(visitKey) || 0) + 1;
+    localStorage.setItem(visitKey, visitCount);
+
+    document.getElementById("todayCount").textContent = visitCount;
+    document.getElementById("counter").textContent = String(1841 + visitCount).padStart(7, "0");
+
+    if (visitCount > 1) {
+      document.getElementById("human-question").textContent = "あなたはまだ人間ですか？";
+      document.getElementById("human-question-ko").textContent = "당신은 아직 사람입니까?";
+    }
+
+    function confirmHuman() {
+      document.getElementById("human-modal").classList.add("hidden");
+      document.getElementById("age-modal").classList.remove("hidden");
+    }
+
+    function rejectHuman() {
+      const body = document.querySelector("#human-modal .modal-body");
+      body.innerHTML =
+        '<div class="modal-icon">×</div>' +
+        '<h2>確認しました</h2>' +
+        '<p>人間ではない場合、この頁を閲覧できません。</p>' +
+        '<p class="minor-warning">창을 닫아 주십시오.</p>';
+    }
+
+    function enterSite() {
+      document.getElementById("age-modal").classList.add("hidden");
+      document.body.classList.remove("modal-open");
+    }
+
+    function leaveSite() {
+      if (window.history.length > 1) window.history.back();
+      else window.location.href = "about:blank";
+    }
+
+    function inspectDoll() {
+      const site = document.getElementById("site");
+      site.classList.remove("glitch");
+      void site.offsetWidth;
+      site.classList.add("glitch");
+      setTimeout(() => site.classList.remove("glitch"), 650);
+
+      document.getElementById("statusText").innerHTML =
+        "接続：正常<br>画像：欠落<br>閲覧者：2名";
+    }
+
+    function searchFake() {
+      const q = document.getElementById("searchInput").value.trim();
+      const out = document.getElementById("searchResult");
+
+      if (!q) {
+        out.textContent = "検索語を入力してください。";
+      } else if (q.includes("一人前")) {
+        out.innerHTML =
+          "3件見つかりました。<br>" +
+          "・応答形式：数量報告<br>" +
+          "・賞賛の意味ではありません<br>" +
+          "・該当音声の再生は制限されています";
+      } else if (q.includes("二人前")) {
+        out.innerHTML =
+          "1件見つかりました。<br>" +
+          "記録状態：音源欠落<br>" +
+          "備考：発声者は当時、意識を失っていた可能性があります。";
+      } else if (q.includes("録音")) {
+        out.innerHTML =
+          "4件見つかりました。<br>" +
+          "録音自体は禁止されていません。<br>" +
+          "第三者への再生後に発生した事象については記録が一致していません。";
+      } else if (q.includes("2025")) {
+        out.innerHTML =
+          "2件見つかりました。<br>" +
+          "1件は非公開、1件は人数不一致のため照合中です。";
+      } else {
+        out.textContent = "該当する記録は見つかりませんでした。";
+      }
+    }
+
+    function checkCount() {
+      const n = Number(document.getElementById("countInput").value);
+      const out = document.getElementById("countResult");
+
+      if (!n) {
+        out.textContent = "人数を入力してください。";
+      } else if (n === 1) {
+        out.textContent = "一人分の怪談が必要です。";
+      } else if (n === 2) {
+        out.textContent = "二人分が確認されました。残り人数を再確認してください。";
+      } else if (n === 5) {
+        out.textContent = "記録上は5名です。現場記録上は一致しません。";
+      } else {
+        out.textContent = n + "名として照合しました。怪談数が不足しています。";
+      }
+    }
+
+    let audioTimer = null;
+
+    function playFakeAudio() {
+      const out = document.getElementById("audioResult");
+      out.textContent = "音声を読み込んでいます……";
+      document.getElementById("statusText").innerHTML =
+        "接続：正常<br>音声：再生中<br>閲覧者：1名";
+
+      clearTimeout(audioTimer);
+      audioTimer = setTimeout(() => {
+        out.innerHTML =
+          "再生できませんでした。<br>" +
+          "<span style='color:#8b4a4a'>一人前。</span>";
+        document.getElementById("statusText").innerHTML =
+          "接続：正常<br>音声：停止<br>閲覧者：2名";
+      }, 1500);
+    }
+
+    function stopFakeAudio() {
+      clearTimeout(audioTimer);
+      document.getElementById("audioResult").textContent = "音声は停止しています。";
+      document.getElementById("statusText").innerHTML =
+        "接続：正常<br>音声：停止<br>閲覧者：1名";
+    }
+
+    function recountPage() {
+      const out = document.getElementById("recountResult");
+      out.textContent = "頁内の人数を確認しています……";
+
+      setTimeout(() => {
+        out.innerHTML =
+          "記録上の閲覧者：1名<br>" +
+          "現在の閲覧者：2名<br>" +
+          "差分は正常です。";
+      }, 900);
+    }
+
+    function openLocked() {
+      const out = document.getElementById("lockedResult");
+      out.textContent = "パスワードを確認しています……";
+
+      setTimeout(() => {
+        out.innerHTML =
+          "認証に失敗しました。<br>" +
+          "ヒント：最初に聞こえた人数。";
+      }, 700);
+    }
+  </script>
+</body>
+</html>
